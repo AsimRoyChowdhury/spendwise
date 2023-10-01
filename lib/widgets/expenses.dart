@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:spendwise/widgets/expenses_list/expenses_list.dart';
 import 'package:spendwise/models/expense.dart';
+import 'package:spendwise/widgets/new_expense.dart';
 
 class Expenses extends StatefulWidget {
   const Expenses({super.key});
@@ -33,9 +34,24 @@ class _ExpensesState extends State<Expenses> {
     ),
   ];
 
+  void _openAddExpenseOverlay() {
+     showModalBottomSheet(
+      context: context,
+      builder: (ctx) => const NewExpense() ,
+    );
+  }
+
   @override
   Widget build(context) {
     return Scaffold(
+      appBar: AppBar(
+        actions: [
+          IconButton(
+            onPressed: _openAddExpenseOverlay,
+            icon: const Icon(Icons.add),
+          ),
+        ],
+      ),
       body: Column(
         children: [
           const Text('The Chart'),
