@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:spendwise/models/expense.dart';
 
 class NewExpense extends StatefulWidget {
-  const NewExpense({super.key});
+  const NewExpense(this.addExpense, {super.key});
+  final void Function(Expense expense) addExpense;
 
   @override
   State<NewExpense> createState() {
@@ -12,6 +14,51 @@ class NewExpense extends StatefulWidget {
 class _NewExpenseState extends State<NewExpense> {
   final _titleController = TextEditingController();
   final _amountController = TextEditingController();
+  DateTime? _selectedDate;
+  Category _selectedCategory = Category.food;
+
+  void _presentDatePicker() async {
+    final now = DateTime.now();
+    final firstDate = DateTime(2000, 1, 1);
+    final pickedDate = await showDatePicker(
+        context: context,
+        initialDate: now,
+        firstDate: firstDate,
+        lastDate: now);
+
+    setState(() {
+      _selectedDate = pickedDate;
+    });
+  }
+
+  void _submitForm() {
+    final enteredAmount = double.tryParse(_amountController.text);
+    if (_titleController.text.trim().isEmpty ||
+        enteredAmount == null ||
+        enteredAmount! <= 0 ||
+        _selectedDate == null) {
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Invalid Input'),
+          content: const Text('Please enter correct Title, Amount and Date'),
+          actions: [
+            OutlinedButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Okay'),
+            ),
+          ],
+        ),
+      );
+    } else {
+      widget.addExpense(Expense(
+          title: _titleController.text,
+          amount: enteredAmount,
+          date: _selectedDate!,
+          category: _selectedCategory));
+      Navigator.pop(context);
+    }
+  }
 
   @override
   void dispose() {
@@ -23,7 +70,7 @@ class _NewExpenseState extends State<NewExpense> {
   @override
   Widget build(context) {
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 100, 16, 16),
       child: Column(
         children: [
           TextField(
@@ -64,14 +111,22 @@ class _NewExpenseState extends State<NewExpense> {
                   ),
                 ),
               ),
-              const SizedBox(width: 120,),
+              const SizedBox(
+                width: 120,
+              ),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const Text('Add Date'),
-                  const SizedBox(width: 2,),
+                  Text(
+                    _selectedDate == null
+                        ? 'Add Date'
+                        : formatter.format(_selectedDate!),
+                  ),
+                  const SizedBox(
+                    width: 2,
+                  ),
                   IconButton(
-                    onPressed: () {},
+                    onPressed: _presentDatePicker,
                     icon: const Icon(Icons.date_range_rounded),
                   ),
                 ],
@@ -84,10 +139,27 @@ class _NewExpenseState extends State<NewExpense> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              ElevatedButton(
-                onPressed: () => print(_amountController.text),
-                child: const Text('Submit'),
+              DropdownButton(
+                value: _selectedCategory,
+                items: Category.values
+                    .map(
+                      (category) => DropdownMenuItem(
+                        value: category,
+                        child: Text(category.name.toUpperCase()),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (value) {
+                  if (value == null) {
+                    return;
+                  } else {
+                    setState(() {
+                      _selectedCategory = value;
+                    });
+                  }
+                },
               ),
+              const Spacer(),
               OutlinedButton(
                 style: ButtonStyle(
                   side: MaterialStateProperty.all(
@@ -99,6 +171,14 @@ class _NewExpenseState extends State<NewExpense> {
                   'Cancel',
                   style: TextStyle(color: Colors.red),
                 ),
+              ),
+              const SizedBox(
+                width: 10,
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                onPressed: _submitForm,
+                child: const Text('Submit'),
               ),
             ],
           ),
