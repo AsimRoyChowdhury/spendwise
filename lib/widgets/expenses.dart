@@ -35,16 +35,40 @@ class _ExpensesState extends State<Expenses> {
   ];
 
   void _openAddExpenseOverlay() {
-     showModalBottomSheet(
+    showModalBottomSheet(
       context: context,
-      builder: (ctx) => const NewExpense() ,
+      builder: (ctx) => NewExpense(_addExpense),
+      isScrollControlled: true,
     );
+  }
+
+  void _addExpense(Expense expense) {
+    setState(() {
+      _registeredExpenses.add(expense);
+    });
+  }
+
+  void _removeExpense(Expense expense) {
+    setState(() {
+      _registeredExpenses.remove(expense);
+    });
   }
 
   @override
   Widget build(context) {
+    Widget mainContent = _registeredExpenses.isNotEmpty
+        ? ExpensesList(
+            expenses: _registeredExpenses,
+            removeExpense: _removeExpense,
+          )
+        : const Center(
+            child: Text('Start Adding Some Expenses'),
+          );
+
+    print('Registered expenses length: ${_registeredExpenses.length}');
     return Scaffold(
       appBar: AppBar(
+        title: const Text('Spendwise'),
         actions: [
           IconButton(
             onPressed: _openAddExpenseOverlay,
@@ -56,7 +80,7 @@ class _ExpensesState extends State<Expenses> {
         children: [
           const Text('The Chart'),
           Expanded(
-            child: ExpensesList(expenses: _registeredExpenses),
+            child: mainContent,
           ),
         ],
       ),
