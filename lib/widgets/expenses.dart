@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:spendwise/widgets/expenses_list/expenses_list.dart';
 import 'package:spendwise/models/expense.dart';
 import 'package:spendwise/widgets/new_expense.dart';
@@ -49,9 +50,25 @@ class _ExpensesState extends State<Expenses> {
   }
 
   void _removeExpense(Expense expense) {
+    var expenseIndex = _registeredExpenses.indexOf(expense);
     setState(() {
       _registeredExpenses.remove(expense);
     });
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        duration: const Duration(seconds: 3),
+        content: const Text('Expense Deleted'),
+        action: SnackBarAction(
+          label: 'Undo',
+          onPressed: () {
+            setState(() {
+              _registeredExpenses.insert(expenseIndex, expense);
+            });
+          },
+        ),
+      ),
+    );
   }
 
   @override
@@ -61,20 +78,29 @@ class _ExpensesState extends State<Expenses> {
             expenses: _registeredExpenses,
             removeExpense: _removeExpense,
           )
-        : const Center(
-            child: Text('Start Adding Some Expenses'),
+        : Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Center(
+              child: Text(
+                'Start Adding Some Expenses',
+                style: GoogleFonts.poppins(
+                    fontSize: 30,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.5),
+                textAlign: TextAlign.center,
+              ),
+            ),
           );
-
-    print('Registered expenses length: ${_registeredExpenses.length}');
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Spendwise'),
-        actions: [
-          IconButton(
-            onPressed: _openAddExpenseOverlay,
-            icon: const Icon(Icons.add),
-          ),
-        ],
+        title: Text(
+          'Spendwise'.toUpperCase(),
+          style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+        ),
+        // actions: [
+
+        // ],
       ),
       body: Column(
         children: [
@@ -84,6 +110,60 @@ class _ExpensesState extends State<Expenses> {
           ),
         ],
       ),
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 40),
+        height: 80,
+        color: const Color.fromARGB(255, 60, 56, 116),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            TextButton(
+              onPressed: () {},
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.settings, color: Colors.white, size: 35),
+                  Text(
+                    'Settings',
+                    style: GoogleFonts.poppins(color: Colors.white),
+                  ),
+                ],
+              ),
+            ),
+            TextButton(
+              onPressed: () {},
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.credit_card, color: Colors.white, size: 35),
+                  Text(
+                    'Add Credit',
+                    style: GoogleFonts.poppins(color: Colors.white),
+                  ),
+                ],
+              ),
+            )
+          ],
+        ),
+      ),
+      floatingActionButton: Container(
+        alignment: Alignment.center,
+        decoration: const BoxDecoration(
+            color: Color.fromARGB(255, 47, 45, 65), shape: BoxShape.circle),
+        height: 100,
+        width: 100,
+        child: Container(
+          decoration:
+              const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+          height: 80,
+          width: 80,
+          child: IconButton(
+            onPressed: _openAddExpenseOverlay,
+            icon: const Icon(Icons.add, color: Colors.white, size: 40),
+          ),
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 }
