@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:spendwise/widgets/chart/chart.dart';
 import 'package:spendwise/widgets/expenses_list/expenses_list.dart';
 import 'package:spendwise/models/expense.dart';
 import 'package:spendwise/widgets/new_expense.dart';
@@ -104,7 +105,7 @@ class _ExpensesState extends State<Expenses> {
       ),
       body: Column(
         children: [
-          const Text('The Chart'),
+          Chart(expenses: _registeredExpenses),
           Expanded(
             child: mainContent,
           ),
