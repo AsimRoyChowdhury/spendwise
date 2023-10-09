@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:spendwise/models/category.dart';
 import 'package:spendwise/models/expense.dart';
 import 'package:spendwise/widgets/chart/chart_bar.dart';
 
@@ -31,6 +33,34 @@ class Chart extends StatelessWidget {
 
   @override
   Widget build(context) {
+
+    
+    Widget chartView() {
+      if (maxTotalExpense > 0) {
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            for (final bucket in buckets)
+              ChartBar(
+                  fill: maxTotalExpense > 0
+                      ? (bucket.totalExpense / maxTotalExpense)
+                      : 0.0),
+          ],
+        );
+      } else {
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text("No Chart Data",
+                style: GoogleFonts.poppins(
+                    color: Colors.white38,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold)),
+          ],
+        );
+      }
+    }
+
     return Container(
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.symmetric(
@@ -49,29 +79,25 @@ class Chart extends StatelessWidget {
       child: Column(
         children: [
           Expanded(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                for (final bucket in buckets)
-                  ChartBar(fill: bucket.totalExpense / maxTotalExpense),
-              ],
-            ),
+            child: chartView(),
           ),
           const SizedBox(
             height: 12,
           ),
           Row(
-            children: buckets.map(
-              (bucket) => Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: Icon(
-                    categoryIcon[bucket.category],
-                    color: Colors.green,
+            children: buckets
+                .map(
+                  (bucket) => Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: Icon(
+                        categoryIcon[bucket.category],
+                        color: Colors.green,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-            ).toList(),
+                )
+                .toList(),
           )
         ],
       ),
