@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:spendwise/models/category.dart';
 import 'package:spendwise/models/expense.dart';
 
 class NewExpense extends StatefulWidget {
