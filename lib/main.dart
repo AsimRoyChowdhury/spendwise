@@ -1,13 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:spendwise/models/category.dart';
+import 'package:spendwise/models/expense.dart';
 import 'package:spendwise/widgets/expenses.dart';
 
 ColorScheme kColorScheme = ColorScheme.fromSeed(
   seedColor: const Color.fromARGB(255, 61, 51, 132),
 );
 
-void main() {
+late Box box;
+
+void main() async {
+  await Hive.initFlutter();
+  Hive.registerAdapter(CategoryAdapter());
+  Hive.registerAdapter(ExpenseAdapter());
+
+  box = await Hive.openBox("spendwise");
   runApp(
     MaterialApp(
+      debugShowCheckedModeBanner: false,
       theme: ThemeData().copyWith(
         useMaterial3: true,
         scaffoldBackgroundColor: const Color.fromARGB(255, 47, 45, 65),
