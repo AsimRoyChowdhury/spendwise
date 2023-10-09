@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:spendwise/data/database.dart';
 import 'package:spendwise/widgets/chart/chart.dart';
 import 'package:spendwise/widgets/expenses_list/expenses_list.dart';
 import 'package:spendwise/models/expense.dart';
@@ -15,26 +17,21 @@ class Expenses extends StatefulWidget {
 }
 
 class _ExpensesState extends State<Expenses> {
-  final List<Expense> _registeredExpenses = [
-    Expense(
-      title: 'Flutter Course',
-      amount: 19.99,
-      date: DateTime.now(),
-      category: Category.work,
-    ),
-    Expense(
-      title: 'Burger',
-      amount: 29.99,
-      date: DateTime.now(),
-      category: Category.food,
-    ),
-    Expense(
-      title: 'Flutter Course 3',
-      amount: 100,
-      date: DateTime.now(),
-      category: Category.travel,
-    ),
-  ];
+  final _mybox = Hive.box("spendwise");
+  SpendwiseDatabase db = SpendwiseDatabase();
+
+  @override
+  void initState() {
+    if (_mybox.get("expenses") == null) {
+      print("Yes");
+      db.createInitialList();
+    } else {
+      print("No");
+      db.loadData();
+    }
+
+    super.initState();
+  }
 
   void _openAddExpenseOverlay() {
     showModalBottomSheet(
@@ -46,15 +43,17 @@ class _ExpensesState extends State<Expenses> {
 
   void _addExpense(Expense expense) {
     setState(() {
-      _registeredExpenses.add(expense);
+      db.registeredExpenses.add(expense);
     });
+    db.updateData();
   }
 
   void _removeExpense(Expense expense) {
-    var expenseIndex = _registeredExpenses.indexOf(expense);
+    var expenseIndex = db.registeredExpenses.indexOf(expense);
     setState(() {
-      _registeredExpenses.remove(expense);
+      db.registeredExpenses.remove(expense);
     });
+    db.updateData();
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -64,7 +63,7 @@ class _ExpensesState extends State<Expenses> {
           label: 'Undo',
           onPressed: () {
             setState(() {
-              _registeredExpenses.insert(expenseIndex, expense);
+              db.registeredExpenses.insert(expenseIndex, expense);
             });
           },
         ),
@@ -74,9 +73,9 @@ class _ExpensesState extends State<Expenses> {
 
   @override
   Widget build(context) {
-    Widget mainContent = _registeredExpenses.isNotEmpty
+    Widget mainContent = db.registeredExpenses.isNotEmpty
         ? ExpensesList(
-            expenses: _registeredExpenses,
+            expenses: db.registeredExpenses,
             removeExpense: _removeExpense,
           )
         : Padding(
@@ -86,7 +85,7 @@ class _ExpensesState extends State<Expenses> {
                 'Start Adding Some Expenses',
                 style: GoogleFonts.poppins(
                     fontSize: 30,
-                    color: Colors.white,
+                    color: Colors.white38,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 1.5),
                 textAlign: TextAlign.center,
@@ -105,7 +104,7 @@ class _ExpensesState extends State<Expenses> {
       ),
       body: Column(
         children: [
-          Chart(expenses: _registeredExpenses),
+          Chart(expenses: db.registeredExpenses),
           Expanded(
             child: mainContent,
           ),
